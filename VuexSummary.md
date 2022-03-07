@@ -25,4 +25,6 @@ https://github.com/vuejs/vuex
 
 ------
 
-## 
+## 2. Vuex工作原理
+
+![](http://cdn.jsdelivr.net/gh/leslieXin92/picGo/img/202203080051941.png)
