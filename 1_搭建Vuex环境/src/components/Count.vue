@@ -1,13 +1,14 @@
 <template>
     <div>
-        <h2>Now count is {{ curCount }}</h2>
+        <h2>Now count is {{ $store.state.sum }}</h2>
         <label for="select">number：</label>
-        <select name="select" v-model="addCount">
-            <option :value="1">1</option>
-            <option :value="2">2</option>
-            <option :value="3">3</option>
+        <select name="select" v-model.number="curCount">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
         </select>
         <button @click="addNow">add now</button>
+        <button @click="subNow">sub now</button>
         <button @click="addOdd">add odd</button>
         <button @click="addWait">add wait</button>
     </div>
@@ -18,23 +19,24 @@ export default {
     name: 'Count',
     data () {
         return {
-            curCount: 0,
-            addCount: 1
+            curCount: 1
         }
+    },
+    mounted () {
+        console.log(this);
     },
     methods: {
         addNow () {
-            this.curCount += this.addCount
+            this.$store.commit('INCREMENT', this.curCount)
+        },
+        subNow () {
+            this.$store.commit('DECREMENT', this.curCount)
         },
         addOdd () {
-            if (this.curCount % 2) {
-                this.curCount += this.addCount
-            }
+            this.$store.dispatch('incrementOdd', this.curCount)
         },
         addWait () {
-            setTimeout(() => {
-                this.curCount += this.addCount
-            }, 1000)
+            this.$store.dispatch('incrementWait', this.curCount)
         }
     }
 }
