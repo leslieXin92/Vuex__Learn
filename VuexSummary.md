@@ -168,9 +168,6 @@ export default {
             curCount: 1
         }
     },
-    mounted () {
-        console.log(this);
-    },
     methods: {
         addNow () {
             this.$store.commit('INCREMENT', this.curCount)
@@ -211,3 +208,128 @@ button {
    ```
 
 3. tips：若没有异步操作和其他业务逻辑，组件中可以跳过actions，不调用dispatch，直接调用commit。
+
+## 5. getters
+
+### demo：
+
+src / store / index.js：
+
+```javascript
+// 引入Vue
+import Vue from 'vue'
+
+// 引入Vuex
+import Vuex from 'vuex'
+
+// actions 用于相应组件中的动作
+const actions = {
+    incrementOdd (context, value) {
+        if (context.state.sum % 2) {
+            context.commit('INCREMENT', value)
+        }
+    },
+    incrementWait (context, value) {
+        setTimeout(() => {
+            context.commit('INCREMENT', value)
+        }, 800)
+    }
+}
+
+// mutations 用于操作数据
+const mutations = {
+    INCREMENT (state, value) {
+        state.sum += value
+    },
+    DECREMENT (state, value) {
+        state.sum -= value
+    }
+}
+
+// state 用于储存数据
+const state = {
+    sum: 0
+}
+
+// getters 用于处理加工state的数据
+const getters = {
+    sumTimes (state) {
+        return state.sum * 10
+    }
+}
+
+// 使用Vuex
+Vue.use(Vuex)
+
+// 创建并暴露store
+export default new Vuex.Store({
+    actions,
+    mutations,
+    state,
+    getters
+})
+```
+
+Count组件：
+
+```javascript
+<template>
+    <div>
+        <h2>Now count is {{ $store.state.sum }}</h2>
+        <h2>10 times count is {{ $store.getters.sumTimes }}</h2>
+        <label for="select">number：</label>
+        <select name="select" v-model.number="curCount">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+        </select>
+        <button @click="addNow">add now</button>
+        <button @click="subNow">sub now</button>
+        <button @click="addOdd">add odd</button>
+        <button @click="addWait">add wait</button>
+    </div>
+</template>
+
+<script>
+export default {
+    name: 'Count',
+    data () {
+        return {
+            curCount: 1
+        }
+    },
+    methods: {
+        addNow () {
+            this.$store.commit('INCREMENT', this.curCount)
+        },
+        subNow () {
+            this.$store.commit('DECREMENT', this.curCount)
+        },
+        addOdd () {
+            this.$store.dispatch('incrementOdd', this.curCount)
+        },
+        addWait () {
+            this.$store.dispatch('incrementWait', this.curCount)
+        }
+    }
+}
+</script>
+
+<style>
+button {
+    margin: 0 5px;
+}
+</style>
+```
+
+### summary：
+
+1. 当state中数据需要经过加工后再使用时，可以使用getters加工。
+
+2. 组件中读取数据：
+
+   ```javascript
+   $store.getters.xxx
+   ```
+
+   

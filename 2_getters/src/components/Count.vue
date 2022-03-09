@@ -1,6 +1,7 @@
 <template>
     <div>
         <h2>Now count is {{ $store.state.sum }}</h2>
+        <h2>10 times count is {{ $store.getters.sumTimes }}</h2>
         <label for="select">number：</label>
         <select name="select" v-model.number="curCount">
             <option value="1">1</option>
