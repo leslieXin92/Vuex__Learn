@@ -336,7 +336,7 @@ button {
 
 ## 6. 四种map方法
 
-### 6.1 mapState
+### 6.1 mapState + mapGetters
 
 src / store / index.js：
 
@@ -403,7 +403,7 @@ Count组件：
 <template>
     <div>
         <h2>Now count is {{ sum }}</h2>
-        <h2>10 times count is {{ $store.state.sumTimes }}</h2>
+        <h2>10 times count is {{ sumTimes }}</h2>
         <h2>name：{{ name }}</h2>
         <h2>age：{{ age }}</h2>
         <label for="select">number：</label>
@@ -433,8 +433,11 @@ export default {
     computed: {
         // 写法一 对象写法：
         ...mapState({ sum: 'sum', name: 'name', age: 'age' }),
+        ...mapGetters({ sumTimes: 'sumTimes' })
+        
         // 写法二 数组写法：
         ...mapState(['sum', 'name', 'age']),
+        ...mapGetters(['sumTimes'])
     },
     methods: {
         addNow () {
@@ -460,7 +463,7 @@ button {
 </style>
 ```
 
-### 6.2 mapGetters
+### 6.2 mapActions + mapMutations
 
 src / store / index.js：
 
@@ -526,26 +529,26 @@ Count组件：
 ```vue
 <template>
     <div>
-        <h2>Now count is {{ $store.state.sum }}</h2>
+        <h2>Now count is {{ sum }}</h2>
         <h2>10 times count is {{ sumTimes }}</h2>
-        <h2>name：{{ $store.state.name }}</h2>
-        <h2>age：{{ $store.state.age }}</h2>
+        <h2>name：{{ name }}</h2>
+        <h2>age：{{ age }}</h2>
         <label for="select">number：</label>
         <select name="select" v-model.number="curCount">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
         </select>
-        <button @click="addNow">add now</button>
-        <button @click="subNow">sub now</button>
-        <button @click="addOdd">add odd</button>
-        <button @click="addWait">add wait</button>
+        <button @click="addNow(curCount)">add now</button>
+        <button @click="subNow(curCount)">sub now</button>
+        <button @click="addOdd(curCount)">add odd</button>
+        <button @click="addWait(curCount)">add wait</button>
     </div>
 </template>
 
 <script>
-// 引入mapState和mapGetters
-import { mapState, mapGetters } from "vuex"
+// 引入mapState、mapGetters、mapActions、mapMutations
+import { mapState, mapGetters, mapActions, mapMutations } from "vuex"
 
 export default {
     name: 'Count',
@@ -556,23 +559,21 @@ export default {
     },
     computed: {
         // 写法一 对象写法：
-        ...mapGetters({ sumTimes: 'sumTimes' })
+        // ...mapState({ sum: 'sum', name: 'name', age: 'age' }),
+        // ...mapGetters({ sumTimes: 'sumTimes' })
+
         // 写法二 数组写法：
+        ...mapState(['sum', 'name', 'age']),
         ...mapGetters(['sumTimes'])
     },
     methods: {
-        addNow () {
-            this.$store.commit('INCREMENT', this.curCount)
-        },
-        subNow () {
-            this.$store.commit('DECREMENT', this.curCount)
-        },
-        addOdd () {
-            this.$store.dispatch('incrementOdd', this.curCount)
-        },
-        addWait () {
-            this.$store.dispatch('incrementWait', this.curCount)
-        }
+        // 方法一 对象写法：
+        ...mapActions({ addOdd: 'incrementOdd', addWait: 'incrementWait' }),
+        ...mapMutations({ addNow: 'INCREMENT', subNow: 'DECREMENT' })
+        
+        // 方法二 数组写法：(需要改插值语法中的函数名)
+        ...mapActions(['incrementOdd', 'incrementWait']),
+        ...mapMutations('INCREMENT', 'DECREMENT')
     }
 }
 </script>
@@ -584,4 +585,10 @@ button {
 </style>
 ```
 
-### 6.3 
+### summary：
+
+1. mapState：映射state中的数据为计算属性。
+2. mapGetters：映射getters中的数据为计算属性。
+3. mapActions：生成与actions对话的方法，包括 $store.dispatch(xxx)。
+4. mapMutations：生成与mutations对话的方法，包括 $store.commit(xxx)。
+5. tips：使用mapActions和mapMutations时，在模板中传递参数，不传则为event。
