@@ -195,3 +195,19 @@ button {
 </style>
 ```
 
+### summary：
+
+1. 组件中读取Vuex中的数据：
+
+   ```javascript
+   $store.state.xxx
+   ```
+
+2. 组件中修改Vuex中的数据：
+
+   ```javascript
+   $store.dispatch('actions functionName', data) 或
+   $store.commit('mutations functionName', data)
+   ```
+
+3. tips：若没有异步操作和其他业务逻辑，组件中可以跳过actions，不调用dispatch，直接调用commit。
