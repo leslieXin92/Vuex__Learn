@@ -559,8 +559,8 @@ export default {
     },
     computed: {
         // 写法一 对象写法：
-        // ...mapState({ sum: 'sum', name: 'name', age: 'age' }),
-        // ...mapGetters({ sumTimes: 'sumTimes' })
+        ...mapState({ sum: 'sum', name: 'name', age: 'age' }),
+        ...mapGetters({ sumTimes: 'sumTimes' })
 
         // 写法二 数组写法：
         ...mapState(['sum', 'name', 'age']),
