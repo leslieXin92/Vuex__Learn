@@ -592,3 +592,9 @@ button {
 3. mapActions：生成与actions对话的方法，包括 $store.dispatch(xxx)。
 4. mapMutations：生成与mutations对话的方法，包括 $store.commit(xxx)。
 5. tips：使用mapActions和mapMutations时，在模板中传递参数，不传则为event。
+
+------
+
+## 7. 模块化+命名空间
+
+### demo：
