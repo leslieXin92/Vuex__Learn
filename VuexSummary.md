@@ -598,3 +598,280 @@ button {
 ## 7. 模块化+命名空间
 
 ### demo：
+
+src / store / index.js：
+
+```javascript
+// 引入Vue
+import Vue from 'vue'
+
+// 引入Vuex
+import Vuex from 'vuex'
+
+import countOptions from './count'
+import personOptions from './person'
+
+// 使用Vuex
+Vue.use(Vuex)
+
+// 创建并暴露store
+export default new Vuex.Store({
+    modules: {
+        countAbout: countOptions,
+        personAbout: personOptions
+    }
+})
+```
+
+src / store / count.js：
+
+```javascript
+// 计数相关配置
+export default {
+    namespaced: true,
+    actions: {
+        incrementOdd (context, value) {
+            if (context.state.sum % 2) {
+                context.commit('INCREMENT', value)
+            }
+        },
+        incrementWait (context, value) {
+            setTimeout(() => {
+                context.commit('INCREMENT', value)
+            }, 800)
+        }
+    },
+    mutations: {
+        INCREMENT (state, value) {
+            state.sum += value
+        },
+        DECREMENT (state, value) {
+            state.sum -= value
+        }
+    },
+    state: {
+        sum: 0,
+        name: 'yahoo',
+        age: 23
+    },
+    getters: {
+        sumTimes (state) {
+            return state.sum * 10
+        }
+    }
+}
+```
+
+src / store / person.js：
+
+```javascript
+// 人员相关配置
+export default {
+    namespaced: true,
+    actions: {
+        addNumberName (context, value) {
+            if (!isNaN(value.name)) {
+                context.commit('ADD_PERSON', value)
+            }
+        }
+    },
+    mutations: {
+        ADD_PERSON (state, value) {
+            state.personList.unshift(value)
+        }
+    },
+    state: {
+        personList: [
+            { name: 'leslie', age: 23 }
+        ]
+    },
+    getters: {
+        firstPerson (state) {
+            return state.personList[0].name
+        }
+    }
+}
+```
+
+Count组件：
+
+```vue
+<template>
+    <div>
+        <h2>Now count is：{{ sum }}</h2>
+        <h2>10 times count is： {{ sumTimes }}</h2>
+        <h2>name：{{ name }}</h2>
+        <h2>age：{{ age }}</h2>
+        <label for="select">number：</label>
+        <select name="select" v-model.number="curCount">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+        </select>
+        <button @click="addNow(curCount)">add now</button>
+        <button @click="subNow(curCount)">sub now</button>
+        <button @click="addOdd(curCount)">add odd</button>
+        <button @click="addWait(curCount)">add wait</button>
+        <h2 class="personCount">person count is {{ personList.length }}</h2>
+    </div>
+</template>
+
+<script>
+import { mapState, mapGetters, mapActions, mapMutations } from "vuex"
+
+export default {
+    name: 'Count',
+    data () {
+        return {
+            curCount: 1
+        }
+    },
+    computed: {
+        ...mapState('countAbout', ['sum', 'name', 'age']),
+        ...mapState('personAbout', ['personList']),
+        ...mapGetters('countAbout', ['sumTimes'])
+    },
+    methods: {
+        ...mapActions('countAbout', { addOdd: 'incrementOdd', addWait: 'incrementWait' }),
+        ...mapMutations('countAbout', { addNow: 'INCREMENT', subNow: 'DECREMENT' })
+    }
+}
+</script>
+
+<style scoped>
+button {
+    margin: 0 5px;
+}
+.personCount {
+    color: red;
+}
+</style>
+```
+
+Person组件：
+
+```vue
+<template>
+    <div>
+        <h2>Count Component sum is：{{ sum }}</h2>
+        <h3>first person is：{{ firstPerson }}</h3>
+        <input type="text" v-model="name" @keyup.enter="addPerson" @keyup.space="addNumber" />
+        <span>{{ ` press Enter add name , press Space add number` }}</span>
+        <ul>
+            <li v-for="person in personList" :key="person.id">{{ person.name }}</li>
+        </ul>
+    </div>
+</template>
+
+<script>
+export default {
+    name: 'Person',
+    data () {
+        return {
+            name: ''
+        }
+    },
+    mounted () {
+        console.log(this.$store.getters);
+    },
+    computed: {
+        firstPerson () {
+            return this.$store.getters['personAbout/firstPerson']
+        },
+        sum () {
+            return this.$store.state.countAbout.sum
+        },
+        personList () {
+            return this.$store.state.personAbout.personList
+        }
+    },
+    methods: {
+        addPerson () {
+            const newPerson = { id: new Date().getTime(), name: this.name }
+            this.$store.commit('personAbout/ADD_PERSON', newPerson)
+            this.name = ''
+        },
+        addNumber () {
+            const newPerson = { id: new Date().getTime(), name: this.name }
+            this.$store.dispatch('personAbout/addNumberName', newPerson)
+            this.name = ''
+        }
+    }
+}
+</script>
+
+<style scoped>
+h2 {
+    color: red;
+}
+</style>
+```
+
+### summary：
+
+1. 目的：让代码更好维护，让多种数据分类更加明确。
+
+2. 修改 store 下 index.js ：
+
+   ```javascript
+   const countAbout = {
+       namespaced: true, // 开启命名空间
+       action: {},
+       mutations: {},
+       state: {},
+       getters: {}
+   }
+   
+   const personAbout = {
+       namespaced: true, // 开启命名空间
+       action: {},
+       mutations: {},
+       state: {},
+       getters: {}
+   }
+   
+   const store = new Vuex.store({
+       modules: {
+           countAbout,
+           personAbout
+       }
+   })
+   ```
+
+3. 组件中调用的方式：
+
+   1. 调用 dispatch：
+
+      ```javascript
+      // 方式一：直接调用dispatch
+      this.$store.dispatch('personAbout/addNumberName', value)
+      //方式二：借助mapActions
+      ...mapActions('countAbout', { addOdd: 'incrementOdd', addWait: 'incrementWait' }),
+      ```
+
+   2. 调用 commit：
+
+      ```javascript
+      // 方式一：直接调用commit
+      context.commit('ADD_PERSON', value)
+      // 方式二：借助mapMutations
+      ...mapMutations('countAbout', { addNow: 'INCREMENT', subNow: 'DECREMENT' })
+      ```
+
+   3. 调用 state：
+
+      ```javascript
+      // 方式一：直接读取state
+      this.$store.state.countAbout.sum
+      // 方式二：借助mapState
+      ...mapState('countAbout', ['sum', 'name', 'age'])
+      ```
+
+   4. 调用 getters：
+
+      ```javascript
+      // 方式一：直接读取getters
+      return this.$store.getters['personAbout/firstPerson']
+      // 方式二：借助mapGetters
+      ...mapGetters('countAbout', ['sumTimes'])
+      ```
